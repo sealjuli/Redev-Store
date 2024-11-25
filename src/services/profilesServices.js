@@ -1,4 +1,3 @@
-const db = require("../config/db");
 const { Profiles } = require("../models/models");
 
 class ProfilesServices {
@@ -24,6 +23,14 @@ class ProfilesServices {
     try {
       const result = await Profiles.update({ ...body }, { where: { userId } });
       return result[0];
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async createProfile(userId) {
+    try {
+      await Profiles.create({ userId });
     } catch (err) {
       console.log(err);
     }

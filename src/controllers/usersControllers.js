@@ -1,8 +1,10 @@
 const UsersServices = require("../services/usersServices");
+const ProfilesServices = require("../services/profilesServices");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const Sentry = require("@sentry/node");
+const Role = require("../helpers/role");
 
 class UsersControllers {
   async userRegister(req, res) {
@@ -23,7 +25,7 @@ class UsersControllers {
       }
 
       // проверка, что админ уже существует
-      if (userType === "admin") {
+      if (userType === Role.admin) {
         const admin = await UsersServices.findAdmin();
         if (admin) {
           return res
@@ -37,12 +39,14 @@ class UsersControllers {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Создание нового пользователя
-      const newUser = {
+      const newUser = await UsersServices.saveUser({
         email,
         password: hashedPassword,
         userType,
-      };
-      await UsersServices.saveUser(newUser);
+      });
+
+      // создание профиля
+      await ProfilesServices.createProfile(newUser.dataValues.id);
 
       res.send("Новый пользователь зарегестрирован");
     } catch (error) {

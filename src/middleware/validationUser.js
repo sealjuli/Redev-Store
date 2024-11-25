@@ -1,4 +1,5 @@
 const { body, query } = require("express-validator");
+const Role = require("../helpers/role");
 
 // Middleware для валидации данных
 const validateBodyUser = [
@@ -9,20 +10,20 @@ const validateBodyUser = [
     .isLength({ min: 6 })
     .withMessage("Пароль должен содержать больше 5 символов"),
   body("userType")
-    .isIn(["admin", "user"])
+    .isIn([Role.admin, Role.user])
     .optional()
     .withMessage("Тип пользователя должен быть либо admin либо user"),
 ];
 
 const validateAdmin = [
   query("userType")
-    .equals("admin")
+    .equals(Role.admin)
     .withMessage("Данное действие может выполнить только администратор."),
 ];
 
 const validateUser = [
   query("userType")
-    .equals("user")
+    .equals(Role.user)
     .optional()
     .withMessage("Данное действие может выполнить только пользователь."),
 ];

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const Role = require("../helpers/role");
 
 const authenticateToken = (req, res, next) => {
   try {
@@ -9,7 +10,11 @@ const authenticateToken = (req, res, next) => {
       if (err) res.status(401).send("invalid token");
       // next(new Error("invalid token"));
       req.userId = data.userId;
-      req.query.userType = data.userType;
+      if (data.userType) {
+        req.query.userType = data.userType;
+      } else {
+        req.query.userType = Role.user;
+      }
       next();
     });
   } catch (error) {

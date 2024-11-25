@@ -1,14 +1,20 @@
-const db = require("../config/db");
-const { Baskets, Products, Payments } = require("../models/models");
-const { Op } = require("sequelize");
+const { Payments } = require("../models/models");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const stripePublic = require("stripe")(process.env.STRIPE_PUBLIC_KEY);
 
 class PaymentsServices {
   async getPayments() {
     try {
       const payments = await Payments.findAll();
       return payments;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async getPaymentsById(id) {
+    try {
+      const payments = await Payments.findAll({ id });
+      return payments[0];
     } catch (err) {
       console.log(err);
     }

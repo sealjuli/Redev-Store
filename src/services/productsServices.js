@@ -1,4 +1,3 @@
-const db = require("../config/db");
 const { Products } = require("../models/models");
 const { Op } = require("sequelize");
 
@@ -67,9 +66,34 @@ class ProductsServices {
     }
   }
 
+  async findProductByIdAttrs(id) {
+    try {
+      const result = await Products.findAll({
+        where: { id },
+        attributes: ["name", "description", "category", "image", "price"],
+      });
+
+      return result[0];
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async updateProduct(id, body) {
     try {
       await Products.update({ ...body }, { where: { id } });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async findProductByIdCount(body) {
+    try {
+      const result = await Products.findAll({
+        where: { id: body.ProductId, count: { [Op.gte]: body.count } },
+      });
+
+      return result[0];
     } catch (err) {
       console.log(err);
     }

@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Sentry = require("@sentry/node");
 const ProfileServices = require("../services/profilesServices");
+const Role = require("../helpers/role");
 
 class ProfileControllers {
   async getProfile(req, res) {
@@ -10,7 +11,7 @@ class ProfileControllers {
     }
 
     try {
-      if (req.query.userType === "admin") {
+      if (req.query.userType === Role.admin) {
         const data = await ProfileServices.getAllProfiles();
         if (data.length > 0) {
           res.send(data);

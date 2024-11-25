@@ -3,6 +3,10 @@ const Sentry = require("@sentry/node");
 const OrdersServices = require("../services/ordersServices");
 const ProfileServices = require("../services/profilesServices");
 const BasketServices = require("../services/basketsServices");
+const PaymentServices = require("../services/paymentsServices");
+const ProductOrdersServices = require("../services/productOrdersServices");
+const productsServices = require("../services/productsServices");
+const Role = require("../helpers/role");
 
 class OrdersControllers {
   async getOrders(req, res) {
@@ -12,11 +16,33 @@ class OrdersControllers {
     }
 
     try {
-      if (req.query.userType === "admin") {
+      if (req.query.userType === Role.admin) {
         // все заказы
-        const order = await OrdersServices.getAllOrders();
-        if (order.length > 0) {
-          res.send(order);
+        let orders = await OrdersServices.getAllOrders();
+        if (orders.length > 0) {
+          for (const element of orders) {
+            const payments = PaymentServices.getPaymentsById(element.paymentId);
+
+            if (payments) {
+              element.dataValues.paymentStatus = payments.status;
+            }
+
+            const products = await ProductOrdersServices.findProductOrderById(
+              element.id
+            );
+            let productsResult = [];
+
+            for (const elem of products) {
+              const product = await productsServices.findProductByIdAttrs(
+                elem.ProductId
+              );
+              productsResult.push({ product: product, count: elem.count });
+            }
+
+            element.dataValues.products = productsResult;
+          }
+
+          res.send(orders);
         } else {
           res.status(500).json({ message: "Заказов еще не было :(" });
         }
@@ -24,8 +50,32 @@ class OrdersControllers {
         // заказы только текущего пользователя
         const profile = await ProfileServices.getProfile(req.userId);
 
-        const order = await OrdersServices.getOrdersByProfileId(profile.id);
+        let order = await OrdersServices.getOrdersByProfileId(profile.id);
         if (order.length > 0) {
+          for (const element of order) {
+            const payment = await PaymentServices.getPaymentsById(
+              element.paymentId
+            );
+
+            if (payment) {
+              element.dataValues.paymentStatus = payment.status;
+            }
+
+            const products = await ProductOrdersServices.findProductOrderById(
+              element.id
+            );
+            let productsResult = [];
+
+            for (const elem of products) {
+              const product = await productsServices.findProductByIdAttrs(
+                elem.ProductId
+              );
+              productsResult.push({ product: product, count: elem.count });
+            }
+
+            element.dataValues.products = productsResult;
+          }
+
           res.send(order);
         } else {
           res.status(500).json({ message: "Заказов еще не было :(" });
@@ -82,10 +132,44 @@ class OrdersControllers {
       const profile = await ProfileServices.getProfile(req.userId);
 
       const basket = await BasketServices.getBasket(profile.id);
-      if (basket) {
+      if (basket.length > 0) {
         // корзина не пустая
+        let summa = 0;
 
-        const order = await OrdersServices.saveOrder(req.body, basket);
+        for (const element of basket) {
+          const product = await productsServices.findProductByIdCount({
+            ProductId: element.ProductId,
+            count: element.count,
+          });
+
+          if (!product) {
+            throw new Error("Какой-то товар из корзины закончился в магазине");
+          }
+
+          summa = summa + element.count * product.price;
+        }
+
+        const order = await OrdersServices.saveOrder(
+          req.body,
+          basket[0].ProfileId,
+          summa
+        );
+
+        // цикл по элементам корзины
+        for (const element of basket) {
+          const product = productsServices.findProductById(element.ProductId);
+
+          // отнимаем из товаров
+          await productsServices.updateProduct(element.ProductId, {
+            count: product.count - element.count,
+          });
+
+          // добавляем товары в заказ
+          await ProductOrdersServices.createProductOrder(order.id, element);
+        }
+
+        // очищаем корзину
+        await BasketServices.clearBasket(basket[0].ProfileId);
 
         if (req.body.paymentMethod === "Онлайн") {
           // создаем платеж
