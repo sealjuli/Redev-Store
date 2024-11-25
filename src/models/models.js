@@ -23,7 +23,7 @@ Products.belongsToMany(Profiles, { through: Baskets });
 Orders.hasOne(Payments, { foreignKey: "orderId" });
 Payments.belongsTo(Orders, { foreignKey: "orderId" });
 
-/*
+
 (async () => {
   try {
     await sequelize.sync({ force: true });
@@ -32,7 +32,7 @@ Payments.belongsTo(Orders, { foreignKey: "orderId" });
     console.error("Error syncing tables:", error);
   }
 })();
-*/
+
 
 module.exports = {
   Users,
