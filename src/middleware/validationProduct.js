@@ -1,6 +1,33 @@
-const { body, param } = require("express-validator");
+const { body, param, query } = require("express-validator");
 
 // Middleware для валидации данных
+const validateQuery = [
+  query("sortByPrice")
+    .isIn(["asc", "desc"])
+    .optional()
+    .withMessage(`Сортировка по цене может быть asc или desc`),
+
+  query("sortByDate")
+    .isIn(["asc", "desc"])
+    .optional()
+    .withMessage(`Сортировка по дате добавления может быть asc или desc`),
+
+  query("category")
+    .isLength({ min: 2 })
+    .optional()
+    .withMessage(`Категория товара должна содержать больше одного символов`),
+
+  query("price")
+    .isNumeric()
+    .optional()
+    .withMessage(`Цена товара должно быть численной`),
+
+  query("availability")
+    .equals("1")
+    .optional()
+    .withMessage(`Отбор по наличию на складе: поставьте 1`),
+];
+
 const validateBody = [
   body("name")
     .isLength({ min: 3 })
@@ -48,4 +75,5 @@ module.exports = {
   validateBody,
   validateParamId,
   validateBodyUpdate,
+  validateQuery,
 };

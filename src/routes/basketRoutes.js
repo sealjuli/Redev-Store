@@ -49,7 +49,7 @@ router.get(
  * /api/store/baskets:
  *    post:
  *      summary: Добавить товар в корзину
- *      description: Добавить в корзину товар
+ *      description: Добавить в корзину товар (count - необязательный. Если count не указан - добавляется ОДИН товар)
  *      tags:
  *        - Basket
  *      security:
@@ -69,7 +69,7 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               ProductId:
+ *               productId:
  *                 type: integer
  *                 example: 1
  *                 description: Идентификатор товара
@@ -84,6 +84,48 @@ router.post(
   validationUserMiddleware.validateUser,
   validationBasketMiddleware.validateBody,
   BasketsControllers.addProductToBasket
+);
+
+/**
+ * @swagger
+ * /api/store/baskets/{id}:
+ *   delete:
+ *     summary: Удаление товара из корзины по id
+ *     description: Удаление товара из корзины по id (count - необязательный. Если count не указан - товар удаляется полностью)
+ *     tags:
+ *       - Basket
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *        $ref: "#/components/requestBodies/BasketDelete"
+ *     responses:
+ *       200:
+ *         description: Товар успешно удален из корзины
+ * components:
+ *   requestBodies:
+ *     BasketDelete:
+ *       description: Свойства запроса для добавления товара в корзину
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *                 example: 1
+ *                 description: Идентификатор товара
+ *               count:
+ *                 type: integer
+ *                 example: 5
+ *                 description: Количество товара
+ */
+router.delete(
+  "/:id",
+  authenticateToken,
+  validationUserMiddleware.validateUser,
+  validationBasketMiddleware.validateBody,
+  BasketsControllers.deleteProductFromBasket
 );
 
 module.exports = router;

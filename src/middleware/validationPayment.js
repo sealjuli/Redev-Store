@@ -1,4 +1,4 @@
-const { body, param } = require("express-validator");
+const { body } = require("express-validator");
 
 // Middleware для валидации данных
 const validateBodyCash = [

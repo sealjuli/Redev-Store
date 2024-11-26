@@ -2,6 +2,8 @@ const { validationResult } = require("express-validator");
 const Sentry = require("@sentry/node");
 const PaymentServices = require("../services/paymentsServices");
 const OrderServices = require("../services/ordersServices");
+const ProfileServices = require("../services/profilesServices");
+const Role = require("../helpers/role");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 class PaymentsControllers {
@@ -12,7 +14,26 @@ class PaymentsControllers {
     }
 
     try {
-      const data = await PaymentServices.getPayments();
+      let data = [];
+      if (req.query.userType === Role.admin) {
+        data = await PaymentServices.getPayments();
+      } else {
+        // отобрать заказы пользователя
+        const profile = await ProfileServices.getProfile(req.userId);
+
+        let orders = await OrderServices.getOrdersByProfileId(profile.id);
+
+        // платежи текущего пользователя
+        if (orders.length > 0) {
+          for (const order of orders) {
+            let payments = await PaymentServices.getPaymentsByOrderId(order.id);
+            if (payments.length > 0) {
+              data.push(payments);
+            }
+          }
+        }
+      }
+
       if (data.length > 0) {
         res.send(data);
       } else {

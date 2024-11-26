@@ -26,7 +26,7 @@ const validationProductMiddleware = require("../middleware/validationProduct");
  *         required: false
  *         schema:
  *           type: string
- *         description: Сортировка по дате добавления (ASC/DESC)
+ *         description: Сортировка по дате добавления (asc/desc)
  *       - in: query
  *         name: category
  *         required: false
@@ -44,7 +44,7 @@ const validationProductMiddleware = require("../middleware/validationProduct");
  *         required: false
  *         schema:
  *           type: integer
- *         description: Поиск по наличию на складе
+ *         description: Поиск по наличию на складе (укажите 1)
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -84,7 +84,12 @@ const validationProductMiddleware = require("../middleware/validationProduct");
  *           example: 50
  *           description: Количество на складе
  */
-router.get("/", authenticateToken, ProductsControllers.getProducts);
+router.get(
+  "/",
+  authenticateToken,
+  validationProductMiddleware.validateQuery,
+  ProductsControllers.getProducts
+);
 
 /**
  * @swagger

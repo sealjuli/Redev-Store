@@ -90,7 +90,7 @@ class ProductsServices {
   async findProductByIdCount(body) {
     try {
       const result = await Products.findAll({
-        where: { id: body.ProductId, count: { [Op.gte]: body.count } },
+        where: { id: body.productId, count: { [Op.gte]: body.count } },
       });
 
       return result[0];

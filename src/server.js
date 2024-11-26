@@ -44,6 +44,7 @@ const desiredOrder = [
   "/api/store/products/{id}",
   "/api/store/products",
   "/api/store/baskets",
+  "/api/store/baskets/{id}",
   "/api/store/orders",
   "/api/store/orders/{id}",
   "/api/store/payments",

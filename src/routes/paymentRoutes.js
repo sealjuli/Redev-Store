@@ -10,8 +10,8 @@ const validationPaymentMiddleware = require("../middleware/validationPayment");
  * @swagger
  * /api/store/payments:
  *   get:
- *     summary: История платежей
- *     description: для админа - просмотр всех платежей
+ *     summary: История платежей пользователя/ для админа - просмотр всех платежей
+ *     description: История платежей пользователя/ для админа - просмотр всех платежей
  *     tags:
  *       - Payments
  *     security:
@@ -44,7 +44,6 @@ const validationPaymentMiddleware = require("../middleware/validationPayment");
 router.get(
   "/",
   authenticateToken,
-  validationUserMiddleware.validateAdmin,
   PaymentsControllers.getPayments
 );
 
@@ -85,7 +84,7 @@ router.get(
 router.post(
   "/",
   authenticateToken,
-  validationUserMiddleware.validateAdmin,
+  // validationUserMiddleware.validateAdmin,
   validationPaymentMiddleware.validateBodyCash,
   PaymentsControllers.addPayment
 );

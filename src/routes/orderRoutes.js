@@ -160,7 +160,7 @@ router.post(
  *             properties:
  *               status:
  *                 type: string
- *                 example: доставлен
+ *                 example: Доставляется
  *                 description: статус заказа
  */
 router.patch(

@@ -11,9 +11,18 @@ class PaymentsServices {
     }
   }
 
+  async getPaymentsByOrderId(orderId) {
+    try {
+      const payments = await Payments.findAll({ where: { orderId } });
+      return payments;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async getPaymentsById(id) {
     try {
-      const payments = await Payments.findAll({ id });
+      const payments = await Payments.findAll({ where: { id } });
       return payments[0];
     } catch (err) {
       console.log(err);

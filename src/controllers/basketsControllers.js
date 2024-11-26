@@ -63,10 +63,12 @@ class BasketsControllers {
     try {
       const profile = await ProfileServices.getProfile(req.userId);
 
+      if (!req.body.count) {
+        req.body.count = 1;
+      }
+
       // проверить, есть ли столько товара в магазине
       const product = await ProductServices.findProductByIdCount(req.body);
-
-      console.log(product)
 
       // если есть
       if (product) {
@@ -77,6 +79,43 @@ class BasketsControllers {
         res
           .status(500)
           .json({ message: "В магазине нет такого количества данного товара" });
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+      console.error(error);
+      if (error.message) {
+        res.status(500).json({ message: error.message });
+      } else {
+        res
+          .status(500)
+          .json({ message: "Ошибка сохранения запроса в базу данных" });
+      }
+    }
+  }
+
+  async deleteProductFromBasket(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const profile = await ProfileServices.getProfile(req.userId);
+
+      // проверить, есть ли товар в магазине
+      const product = await BasketServices.getBasketByProductId(
+        profile.id,
+        req.body.productId
+      );
+
+      // если есть
+      if (product) {
+        // удалить из корзины
+        await BasketServices.deleteProductsFromBasket(profile.id, req.body);
+        res.send("OK");
+      } else {
+        // нет товара
+        res.status(500).json({ message: "В корзине нет данного товара" });
       }
     } catch (error) {
       Sentry.captureException(error);
