@@ -138,7 +138,7 @@ class OrdersControllers {
 
         for (const element of basket) {
           const product = await productsServices.findProductByIdCount({
-            ProductId: element.ProductId,
+            ProductId: element.productId,
             count: element.count,
           });
 
@@ -157,7 +157,9 @@ class OrdersControllers {
 
         // цикл по элементам корзины
         for (const element of basket) {
-          const product = await productsServices.findProductById(element.ProductId);
+          const product = await productsServices.findProductById(
+            element.ProductId
+          );
 
           // отнимаем из товаров
           await productsServices.updateProduct(element.ProductId, {
