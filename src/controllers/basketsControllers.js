@@ -102,14 +102,14 @@ class BasketsControllers {
     try {
       const profile = await ProfileServices.getProfile(req.userId);
 
-      // проверить, есть ли товар в магазине
+      // проверить, есть ли товар в корзине
       const product = await BasketServices.getBasketByProductId(
         profile.id,
         req.body.productId
       );
 
       // если есть
-      if (product) {
+      if (product.length > 0) {
         // удалить из корзины
         await BasketServices.deleteProductsFromBasket(profile.id, req.body);
         res.send("OK");
