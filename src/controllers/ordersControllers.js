@@ -138,7 +138,7 @@ class OrdersControllers {
 
         for (const element of basket) {
           const product = await productsServices.findProductByIdCount({
-            ProductId: element.productId,
+            productId: element.ProductId,
             count: element.count,
           });
 
